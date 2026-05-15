@@ -1,104 +1,95 @@
 // src/pages/Dashboard.jsx
-import { useState } from "react";
+// Light blanc froid theme — coral accent — 6 villes marocaines
+
 import Navbar from "../components/Navbar";
 import TripForm from "../components/TripForm/TripForm";
 import Sidebar from "../components/Sidebar";
 
-// ─── Left Panel ───────────────────────────────────────────────────────────────
+const C  = "#DA7756";
+const CH = "#C9623D";
+
+/* ── Left panel ─────────────────────────────────────────────── */
 const LeftPanel = () => (
   <aside
-    className="hidden xl:flex w-72 flex-col gap-7 px-5 py-8 overflow-y-auto"
-    style={{
-      background: "rgba(255, 255, 255, 0.07)",
-      backdropFilter: "blur(20px)",
-      WebkitBackdropFilter: "blur(20px)",
-      borderRight: "1px solid rgba(255,255,255,0.15)",
-    }}
+    className="hidden xl:flex w-72 flex-col gap-6 px-5 py-7 overflow-y-auto border-r"
+    style={{ background:"#FFFFFF", borderColor:"#E7E5E0" }}
   >
-    {/* Trending Destinations */}
+    {/* Trending cities */}
     <div>
-      <p className="xp-label mb-4">Trending Destinations</p>
+      <p className="text-[10px] font-bold tracking-widest uppercase mb-4" style={{color:"#A8A29E"}}>
+        Destinations Tendance
+      </p>
       <div className="flex flex-col gap-2">
         {[
-          { name: "Goa, India",    tag: "Beach",     temp: "31°C" },
-          { name: "Manali, HP",    tag: "Mountain",  temp: "12°C" },
-          { name: "Jaipur, RJ",   tag: "Heritage",  temp: "28°C" },
-          { name: "Kerala",        tag: "Nature",    temp: "29°C" },
-          { name: "Ladakh, JK",   tag: "Adventure", temp: "4°C"  },
-        ].map((dest, i) => (
-          <div
-            key={i}
-            className="flex items-center justify-between px-3 py-2.5 rounded-xl cursor-default transition-all duration-200"
-            style={{
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.15)",
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = "rgba(201,169,110,0.18)"}
-            onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.08)"}
+          { name:"Marrakech",   tag:"Médina · Palais",  temp:"28°C" },
+          { name:"Casablanca",  tag:"Métropole",        temp:"22°C" },
+          { name:"Chefchaouen", tag:"Ville Bleue",      temp:"18°C" },
+          { name:"Fès",         tag:"Patrimoine",       temp:"24°C" },
+          { name:"Agadir",      tag:"Plage Atlantique", temp:"26°C" },
+          { name:"Rabat",       tag:"Capitale Royale",  temp:"21°C" },
+        ].map((d, i) => (
+          <div key={i}
+            className="flex items-center justify-between px-3 py-2.5 rounded-xl cursor-default transition-all duration-200 border"
+            style={{ background:"#F6F5F2", borderColor:"#E7E5E0" }}
+            onMouseEnter={e=>{ e.currentTarget.style.background="rgba(218,119,86,0.06)"; e.currentTarget.style.borderColor="rgba(218,119,86,0.25)"; }}
+            onMouseLeave={e=>{ e.currentTarget.style.background="#F6F5F2"; e.currentTarget.style.borderColor="#E7E5E0"; }}
           >
             <div className="min-w-0">
-              <p className="xp-body-sm font-medium truncate" style={{ color: "rgba(255,255,255,0.90)" }}>{dest.name}</p>
-              <p className="xp-caption" style={{ color: "rgba(201,169,110,0.85)" }}>{dest.tag}</p>
+              <p className="text-sm font-semibold truncate" style={{color:"#1C1917"}}>{d.name}</p>
+              <p className="text-[10px]" style={{color:C}}>{d.tag}</p>
             </div>
-            <span className="xp-caption shrink-0 ml-2" style={{ color: "rgba(255,255,255,0.60)" }}>{dest.temp}</span>
+            <span className="text-xs shrink-0 ml-2" style={{color:"#A8A29E"}}>{d.temp}</span>
           </div>
         ))}
       </div>
     </div>
 
     {/* Pro Tip */}
-    <div
-      className="rounded-xl p-4"
-      style={{
-        background: "rgba(201,169,110,0.2)",
-        border: "1px solid rgba(201,169,110,0.35)",
-      }}
-    >
-      <p className="xp-label mb-2" style={{ color: "#c9a96e" }}>✦ Pro Tip</p>
-      <p className="xp-body-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>
-        Book flights at least 6–8 weeks in advance for domestic routes to get the best fares.
+    <div className="rounded-xl p-4 border"
+      style={{ background:"rgba(218,119,86,0.05)", borderColor:"rgba(218,119,86,0.20)" }}>
+      <p className="text-[10px] font-bold tracking-widest uppercase mb-2" style={{color:C}}>✦ Conseil Pro</p>
+      <p className="text-xs leading-relaxed" style={{color:"#57534E"}}>
+        Réservez vos riads à Marrakech au moins 4 semaines à l'avance pour les meilleurs tarifs.
       </p>
     </div>
 
-    {/* Platform Stats */}
+    {/* Platform stats */}
     <div>
-      <p className="xp-label mb-4">Platform Stats</p>
+      <p className="text-[10px] font-bold tracking-widest uppercase mb-4" style={{color:"#A8A29E"}}>
+        Statistiques
+      </p>
       <div className="grid grid-cols-2 gap-2">
         {[
-          { value: "10K+", label: "Trips Planned" },
-          { value: "150+", label: "Destinations" },
-          { value: "4.9★", label: "Avg Rating" },
-          { value: "98%",  label: "Accuracy" },
-        ].map((stat, i) => (
-          <div
-            key={i}
-            className="rounded-xl px-3 py-3 text-center"
-            style={{
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.15)",
-            }}
-          >
-            <p className="xp-stat-val">{stat.value}</p>
-            <p className="xp-caption mt-0.5" style={{ color: "rgba(255,255,255,0.55)" }}>{stat.label}</p>
+          { value:"12K+", label:"Voyages Créés" },
+          { value:"6",    label:"Villes Maroc"  },
+          { value:"98%",  label:"Satisfaction"  },
+          { value:"<30s", label:"Plan Généré"   },
+        ].map((s, i) => (
+          <div key={i} className="rounded-xl px-3 py-3 text-center border"
+            style={{ background:"#F6F5F2", borderColor:"#E7E5E0" }}>
+            <p className="font-serif font-bold text-lg" style={{color:C}}>{s.value}</p>
+            <p className="text-[10px] mt-0.5" style={{color:"#A8A29E"}}>{s.label}</p>
           </div>
         ))}
       </div>
     </div>
 
-    {/* Best Travel Months */}
+    {/* Best seasons */}
     <div>
-      <p className="xp-label mb-4">Best Travel Months</p>
-      <div className="flex flex-col gap-2">
+      <p className="text-[10px] font-bold tracking-widest uppercase mb-4" style={{color:"#A8A29E"}}>
+        Meilleures Saisons
+      </p>
+      <div className="flex flex-col gap-2.5">
         {[
-          { region: "North India", months: "Oct — Mar", dot: "#7db8f7" },
-          { region: "South India", months: "Nov — Feb", dot: "#6ee7b7" },
-          { region: "Himalaya",    months: "May — Sep", dot: "#c9a96e" },
-          { region: "Beaches",     months: "Nov — Apr", dot: "#fbbf60" },
+          { region:"Marrakech & Fès", months:"Mars – Mai",  dot:C          },
+          { region:"Côte Atlantique", months:"Juin – Sept", dot:"#e8956d"  },
+          { region:"Atlas & Rif",     months:"Avr – Oct",   dot:"#60a5fa"  },
+          { region:"Désert Sud",      months:"Oct – Fév",   dot:"#fbbf24"  },
         ].map((item, i) => (
           <div key={i} className="flex items-center gap-2.5">
-            <div className="w-2 h-2 rounded-full shrink-0" style={{ background: item.dot }} />
-            <p className="xp-body-sm flex-1 truncate" style={{ color: "rgba(255,255,255,0.75)" }}>{item.region}</p>
-            <p className="xp-caption" style={{ color: "rgba(255,255,255,0.50)" }}>{item.months}</p>
+            <div className="w-2 h-2 rounded-full shrink-0" style={{background:item.dot}}/>
+            <p className="text-xs flex-1 truncate" style={{color:"#57534E"}}>{item.region}</p>
+            <p className="text-[10px]" style={{color:"#A8A29E"}}>{item.months}</p>
           </div>
         ))}
       </div>
@@ -106,139 +97,52 @@ const LeftPanel = () => (
   </aside>
 );
 
-// ─── Dashboard ────────────────────────────────────────────────────────────────
-const Dashboard = () => {
-  return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=Outfit:wght@300;400;500;600&display=swap');
+/* ── Dashboard ──────────────────────────────────────────────── */
+const Dashboard = () => (
+  <div className="min-h-screen" style={{background:"#F6F5F2"}}>
 
-        .xp-wallpaper {
-          position: fixed;
-          inset: 0;
-          z-index: 0;
-          background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&q=85');
-          background-size: cover;
-          background-position: center 35%;
-          /* ❌ NO backgroundAttachment: fixed — breaks iOS Safari */
-        }
-        .xp-wallpaper::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            160deg,
-            rgba(4,3,2,0.72) 0%,
-            rgba(8,6,4,0.60) 50%,
-            rgba(4,3,2,0.75) 100%
-          );
-        }
+    <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=Outfit:wght@300;400;500;600&display=swap');
 
-        .xp-page {
-          position: relative;
-          z-index: 1;
-          min-height: 100vh;
-        }
+      /* scrollbars */
+      aside::-webkit-scrollbar { width:4px; }
+      aside::-webkit-scrollbar-track { background:transparent; }
+      aside::-webkit-scrollbar-thumb { background:rgba(218,119,86,0.25); border-radius:99px; }
+      .xp-main::-webkit-scrollbar { width:4px; }
+      .xp-main::-webkit-scrollbar-track { background:transparent; }
+      .xp-main::-webkit-scrollbar-thumb { background:#D6D3CE; border-radius:99px; }
 
-        .xp-label {
-          font-family: 'Outfit', sans-serif;
-          font-size: 10px;
-          font-weight: 600;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
-          color: rgba(255,255,255,0.45);
-        }
-        .xp-body-sm {
-          font-family: 'Outfit', sans-serif;
-          font-size: 12px;
-          font-weight: 400;
-          color: rgba(255,255,255,0.85);
-        }
-        .xp-caption {
-          font-family: 'Outfit', sans-serif;
-          font-size: 10px;
-          color: rgba(255,255,255,0.45);
-        }
-        .xp-stat-val {
-          font-family: 'Playfair Display', serif;
-          font-size: 18px;
-          font-weight: 700;
-          color: #c9a96e;
-          line-height: 1;
-        }
+      @media(min-width:768px){ .xp-layout{ height:calc(100vh - 64px)!important; } }
+    `}</style>
 
-        aside::-webkit-scrollbar { width: 3px; }
-        aside::-webkit-scrollbar-track { background: transparent; }
-        aside::-webkit-scrollbar-thumb { background: rgba(201,169,110,0.25); border-radius: 99px; }
+    <Navbar/>
 
-        .xp-main::-webkit-scrollbar { width: 4px; }
-        .xp-main::-webkit-scrollbar-track { background: transparent; }
-        .xp-main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
-      `}</style>
+    <div className="xp-layout flex w-full" style={{height:"calc(100vh - 56px)"}}>
 
-      <div className="xp-wallpaper" />
+      <LeftPanel/>
 
-      <div className="xp-page">
-        <Navbar />
+      {/* Main form area */}
+      <main
+        className="xp-main flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 pb-24 md:pb-8 flex items-start justify-center"
+        style={{background:"#F6F5F2"}}
+      >
+        <TripForm/>
+      </main>
 
-        {/*
-          Layout height:
-          - Desktop navbar = 64px (h-16) → calc(100vh - 64px)
-          - Mobile  navbar = 56px (h-14) → calc(100vh - 56px)
-        */}
-        <div
-          className="flex"
-          style={{ height: "calc(100vh - 56px)" }}
-          // Override for md+ via inline won't work; use a wrapper trick below
-        >
-          {/* Apply correct height per breakpoint via a sibling style tag trick:
-              actual height is set via CSS class overrides below */}
-          <style>{`
-            @media (min-width: 768px) {
-              .xp-layout { height: calc(100vh - 64px) !important; }
-            }
-          `}</style>
-          <div className="xp-layout flex w-full" style={{ height: "calc(100vh - 56px)" }}>
-            <LeftPanel />
+      {/* Sidebar — AI assistant */}
+      <aside
+        className="w-80 hidden md:flex flex-col overflow-hidden border-l"
+        style={{ background:"#FFFFFF", borderColor:"#E7E5E0" }}
+      >
+        <Sidebar/>
+      </aside>
+    </div>
 
-            {/*
-              main: pb-24 on mobile so TripForm content isn't hidden
-              behind the floating AI button (bottom: 20px, height ~52px → safe 80px)
-            */}
-            <main className="xp-main flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 pb-24 md:pb-8 flex items-start justify-center">
-              <TripForm />
-            </main>
-
-            {/*
-              Desktop sidebar — hidden on mobile.
-              Sidebar component renders its own floating button + bottom sheet on mobile,
-              so we don't need to render it here at all on mobile.
-            */}
-            <aside
-              className="w-80 hidden md:flex flex-col overflow-hidden"
-              style={{
-                background: "rgba(8, 6, 4, 0.55)",
-                backdropFilter: "blur(18px)",
-                WebkitBackdropFilter: "blur(18px)",
-                borderLeft: "1px solid rgba(255,255,255,0.07)",
-              }}
-            >
-              <Sidebar />
-            </aside>
-          </div>
-        </div>
-
-        {/*
-          Mobile Sidebar — renders OUTSIDE the layout so the floating button
-          and bottom sheet are not constrained by the aside's display:none.
-          On md+ the Sidebar inside the aside above handles rendering.
-        */}
-        <div className="md:hidden">
-          <Sidebar />
-        </div>
-      </div>
-    </>
-  );
-};
+    {/* Mobile sidebar */}
+    <div className="md:hidden">
+      <Sidebar/>
+    </div>
+  </div>
+);
 
 export default Dashboard;

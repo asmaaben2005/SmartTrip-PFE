@@ -1,37 +1,53 @@
 // src/context/AuthContext.jsx
-import { createContext, useState } from "react";
+// ─────────────────────────────────────────────────────────────
+// Stores JWT + user in localStorage so the app "remembers"
+// the session on page refresh or navigation.
+// ─────────────────────────────────────────────────────────────
+import { createContext, useState, useEffect } from "react";
 
 export const AuthContext = createContext(null);
 
-const getSavedUser = () => {
+// ── Safe localStorage readers ─────────────────────────────────
+const readToken = () => {
+  try { return localStorage.getItem("smarttrip_token") || null; }
+  catch { return null; }
+};
+
+const readUser = () => {
   try {
-    const stored = localStorage.getItem("user");
-    return stored ? JSON.parse(stored) : null;
+    const raw = localStorage.getItem("smarttrip_user");
+    return raw ? JSON.parse(raw) : null;
   } catch {
-    localStorage.removeItem("user"); // wipe corrupted data
+    localStorage.removeItem("smarttrip_user");
     return null;
   }
 };
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem("token") || null);
-  const [user, setUser] = useState(getSavedUser);   // lazy initializer, no ()
+  // ── Initialize directly from localStorage ──────────────────
+  // This is the KEY fix: we read localStorage on FIRST render,
+  // so after a refresh or page change the user is still logged in.
+  const [token, setToken] = useState(readToken);
+  const [user,  setUser]  = useState(readUser);
 
+  // ── login: save to state + localStorage ────────────────────
   const login = (tokenValue, userData) => {
-    localStorage.setItem("token", tokenValue);
-    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("smarttrip_token", tokenValue);
+    localStorage.setItem("smarttrip_user",  JSON.stringify(userData));
     setToken(tokenValue);
     setUser(userData);
-  }; 
+  };
 
+  // ── logout: clear everything ────────────────────────────────
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    localStorage.removeItem("smarttrip_token");
+    localStorage.removeItem("smarttrip_user");
     setToken(null);
     setUser(null);
   };
 
-  const isAuthenticated = !!token;
+  // ── isAuthenticated: true when we have a valid token ────────
+  const isAuthenticated = Boolean(token);
 
   return (
     <AuthContext.Provider value={{ token, user, login, logout, isAuthenticated }}>
