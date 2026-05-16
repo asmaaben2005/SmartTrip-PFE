@@ -1,52 +1,55 @@
 // src/context/AuthContext.jsx
 // ─────────────────────────────────────────────────────────────
-// Stores JWT + user in localStorage so the app "remembers"
-// the session on page refresh or navigation.
+// Global authentication state.
+// Persists JWT + user object in localStorage so the session
+// survives page refresh, tab close/reopen, and navigation.
 // ─────────────────────────────────────────────────────────────
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useCallback } from "react";
 
 export const AuthContext = createContext(null);
 
-// ── Safe localStorage readers ─────────────────────────────────
-const readToken = () => {
-  try { return localStorage.getItem("smarttrip_token") || null; }
+// ── Safe localStorage helpers ─────────────────────────────────
+const LS_TOKEN = "smarttrip_token";
+const LS_USER  = "smarttrip_user";
+
+const loadToken = () => {
+  try { return localStorage.getItem(LS_TOKEN) || null; }
   catch { return null; }
 };
 
-const readUser = () => {
+const loadUser = () => {
   try {
-    const raw = localStorage.getItem("smarttrip_user");
+    const raw = localStorage.getItem(LS_USER);
     return raw ? JSON.parse(raw) : null;
   } catch {
-    localStorage.removeItem("smarttrip_user");
+    localStorage.removeItem(LS_USER);
     return null;
   }
 };
 
 export const AuthProvider = ({ children }) => {
-  // ── Initialize directly from localStorage ──────────────────
-  // This is the KEY fix: we read localStorage on FIRST render,
-  // so after a refresh or page change the user is still logged in.
-  const [token, setToken] = useState(readToken);
-  const [user,  setUser]  = useState(readUser);
+  // ── Lazy initial state: read localStorage ONCE on first render
+  // This is the fix that prevents session loss on page refresh.
+  const [token, setToken] = useState(loadToken);
+  const [user,  setUser]  = useState(loadUser);
 
-  // ── login: save to state + localStorage ────────────────────
-  const login = (tokenValue, userData) => {
-    localStorage.setItem("smarttrip_token", tokenValue);
-    localStorage.setItem("smarttrip_user",  JSON.stringify(userData));
+  // ── login: persist to state + localStorage atomically ────────
+  const login = useCallback((tokenValue, userData) => {
+    localStorage.setItem(LS_TOKEN, tokenValue);
+    localStorage.setItem(LS_USER,  JSON.stringify(userData));
     setToken(tokenValue);
     setUser(userData);
-  };
+  }, []);
 
-  // ── logout: clear everything ────────────────────────────────
-  const logout = () => {
-    localStorage.removeItem("smarttrip_token");
-    localStorage.removeItem("smarttrip_user");
+  // ── logout: wipe everything ───────────────────────────────────
+  const logout = useCallback(() => {
+    localStorage.removeItem(LS_TOKEN);
+    localStorage.removeItem(LS_USER);
     setToken(null);
     setUser(null);
-  };
+  }, []);
 
-  // ── isAuthenticated: true when we have a valid token ────────
+  // ── isAuthenticated: derived boolean ─────────────────────────
   const isAuthenticated = Boolean(token);
 
   return (

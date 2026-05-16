@@ -35,15 +35,34 @@ TOGETHER_API_KEY_3 = os.environ.get("TOGETHER_API_KEY_3")
 
 # ── JSON cleaner (shared by all providers) ─────────────────
 def clean_and_parse(raw: str) -> dict:
-    """Strip markdown fences and parse JSON."""
+    """Strip markdown fences, handle preamble text, and parse JSON safely."""
     raw = raw.strip()
     if not raw:
         raise Exception("Empty response received")
-    if raw.startswith("```"):
-        raw = raw.split("```")[1]
-        if raw.startswith("json"):
-            raw = raw[4:]
-    return json.loads(raw.strip())
+    
+    # محاولة استخراج الـ JSON إذا كان محاطاً بـ Markdown Fences
+    if "```" in raw:
+        try:
+            parts = raw.split("```")
+            for part in parts:
+                part_clean = part.strip()
+                if part_clean.startswith("json"):
+                    part_clean = part_clean[4:].strip()
+                if part_clean.startswith("{") and part_clean.endswith("}"):
+                    return json.loads(part_clean)
+        except Exception:
+            pass
+
+    # إذا أضاف النموذج نصاً تمهيدياً قبل أو بعد الـ JSON، نبحث عن أول { وأخر }
+    start_idx = raw.find("{")
+    end_idx = raw.rfind("}")
+    if start_idx != -1 and end_idx != -1:
+        try:
+            return json.loads(raw[start_idx:end_idx+1].strip())
+        except Exception:
+            pass
+
+    return json.loads(raw)
 
 
 # ── Retry wrapper ──────────────────────────────────────────
@@ -196,7 +215,7 @@ async def _openrouter_call(prompt: str, api_key: str) -> dict:
                     "max_tokens": 4000,
                     "temperature": 0.7,
                 },
-                timeout=30.0,
+                timeout=60.0,  # تمديد الوقت لحماية الطلبات الطويلة من الـ Timeout
             )
             response.raise_for_status()
             data = response.json()
@@ -232,7 +251,7 @@ async def _mistral_call(prompt: str, api_key: str) -> dict:
                     "max_tokens": 4000,
                     "temperature": 0.7,
                 },
-                timeout=30.0,
+                timeout=60.0,  # تمديد الوقت لـ 60 ثانية
             )
             response.raise_for_status()
             data = response.json()
@@ -268,7 +287,7 @@ async def _together_call(prompt: str, api_key: str) -> dict:
                     "max_tokens": 4000,
                     "temperature": 0.7,
                 },
-                timeout=30.0,
+                timeout=60.0,  # تمديد الوقت ليتناسب مع تفكير DeepSeek المشهور بالبطء
             )
             response.raise_for_status()
             data = response.json()
@@ -293,7 +312,6 @@ async def call_ai_with_fallback(prompt: str) -> tuple[dict, str]:
     Tries all 15 provider+account combinations in order.
     Order: Groq(1→2→3) → Gemini2.0(1→2→3) → Gemini1.5(1→2→3)
            → OpenRouter(1→2→3) → Mistral(1→2→3) → Together(1→2→3)
-           → OpenRouter(2→3) → Mistral(2→3) → Together(2→3)
 
     Each provider has its own retry logic for transient errors.
     Returns (result_dict, provider_name_used).
@@ -338,7 +356,7 @@ async def call_ai_with_fallback(prompt: str) -> tuple[dict, str]:
             print(f"[AI] ❌ {name} failed: {e}")
             errors.append(f"{name}: {str(e)[:80]}")
 
-    raise Exception(f"All 18 AI providers failed. Errors: {' | '.join(errors)}")
+    raise Exception(f"All 15 AI providers failed. Errors: {' | '.join(errors)}")
 
 
 # ── Location resolver using Groq ───────────────────────────
@@ -373,7 +391,7 @@ Examples:
 
 Now resolve: "{destination}"
 """
-    # Try acc1 → acc2 → acc3 for location resolver
+    # إصلاح التمرير المباشر للدوال والمتغيرات داخل الـ Executor لضمان تخطي الحسابات بسلاسة
     for client, acc in [(groq_client, "acc1"), (groq_client_2, "acc2"), (groq_client_3, "acc3")]:
         try:
             response = await asyncio.get_event_loop().run_in_executor(

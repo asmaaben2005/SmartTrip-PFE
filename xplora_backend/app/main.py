@@ -1,37 +1,52 @@
-# app/main.py — add trips router
+# xplora_backend/app/main.py
+# ─────────────────────────────────────────────────────────────
+# Run from xplora_backend/:
+#   python -m uvicorn app.main:app --reload
+# ─────────────────────────────────────────────────────────────
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import Base, engine
-from app.routers import auth, trips  
-from app import models
 from dotenv import load_dotenv
-from app.routers import surprise
-from app.routers import sidebar
+
+from app.database import Base, engine
+from app.routers  import auth, trips
 
 load_dotenv()
 
+logging.basicConfig(
+    level  = logging.INFO,
+    format = "%(asctime)s | %(levelname)s | %(message)s",
+)
+
+# Create all tables on startup
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Xplora API")
+app = FastAPI(
+    title       = "SmartTrip API",
+    description = "AI-powered Moroccan Travel Planner",
+    version     = "1.0.0",
+    docs_url    = "/docs",
+)
 
+# ── CORS ─────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "http://localhost:5174",  # <--- زيدي هاد السطر ضروري
-        "http://127.0.0.1:5174",  # وزيدي هادا للاحتياط
-        "https://xplora-ai.netlify.app",
+        "http://localhost:5174",
+        "http://localhost:5175",
+        "http://localhost:5176",
+        "http://localhost:3000",
     ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_credentials = True,
+    allow_methods     = ["*"],
+    allow_headers     = ["*"],
 )
 
-app.include_router(auth.router, prefix="/auth", tags=["auth"])
-app.include_router(trips.router, prefix="/trips", tags=["trips"])
-app.include_router(surprise.router, prefix="/surprise", tags=["surprise"])
-app.include_router(sidebar.router, prefix="/sidebar", tags=["sidebar"])
+# ── Routers ───────────────────────────────────────────────────
+app.include_router(auth.router,  prefix="/api/auth",  tags=["Auth"])
+app.include_router(trips.router, prefix="/api/trips", tags=["Trips"])
 
-@app.get("/")
-def root():
-    return {"message": "Xplora API is running"}
+@app.get("/", tags=["Health"])
+def health():
+    return {"status": "ok", "service": "SmartTrip API", "version": "1.0.0"}

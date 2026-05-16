@@ -1,19 +1,29 @@
 // src/components/TripForm/Step1.jsx
+// White cold theme — English — coral accent
 import useTranslate from "../../hooks/useTranslate";
+
+const T = {
+  coral:       "#DA7756",
+  coralHover:  "#C9623D",
+  coralLight:  "rgba(218,119,86,0.08)",
+  coralBorder: "rgba(218,119,86,0.40)",
+  border:      "#E7E5E0",
+  borderFocus: "#DA7756",
+  text:        "#1C1917",
+  muted:       "#A8A29E",
+  bg:          "#FFFFFF",
+  inputBg:     "#FAFAF9",
+  error:       "rgba(239,68,68,0.10)",
+  errorBorder: "rgba(239,68,68,0.50)",
+};
 
 const isValidPlace = (val) =>
   val.trim().length >= 2 && /^[a-zA-ZÀ-ÿ\s,.\-']+$/.test(val.trim());
 
-const G = {
-  primary:     "#da7756",
-  bright:      "#e8956d",
-  badgeBorder: "rgba(218,119,86,0.35)",
-  badge:       "rgba(218,119,86,0.12)",
-};
-
-const InputField = ({ label, placeholder, value, onChange, invalid, errorMsg }) => (
+// ── Input ─────────────────────────────────────────────────────
+const Field = ({ label, placeholder, value, onChange, invalid, errorMsg }) => (
   <div className="flex flex-col gap-1.5">
-    <label className="text-[10px] font-bold tracking-widest text-white/30 uppercase">
+    <label className="text-[11px] font-bold tracking-widest uppercase" style={{ color:T.muted }}>
       {label}
     </label>
     <input
@@ -21,17 +31,17 @@ const InputField = ({ label, placeholder, value, onChange, invalid, errorMsg }) 
       placeholder={placeholder}
       value={value}
       onChange={onChange}
-      className={`w-full rounded-xl px-4 py-3 min-h-12 text-sm text-white/85 placeholder-white/20 focus:outline-none transition-all duration-200 border ${
-        invalid
-          ? "border-red-500/40 bg-red-500/5 focus:border-red-500/60"
-          : "border-white/10 bg-white/5 focus:bg-white/8"
-      }`}
-      style={ invalid ? {} : { "--tw-border-opacity":1 }}
-      onFocus={e=>{ if(!invalid) e.currentTarget.style.borderColor=G.badgeBorder; }}
-      onBlur={e=>{ if(!invalid) e.currentTarget.style.borderColor="rgba(255,255,255,0.10)"; }}
+      className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all duration-200"
+      style={{
+        background:  invalid ? T.error    : T.inputBg,
+        border:      `1.5px solid ${invalid ? T.errorBorder : T.border}`,
+        color:       T.text,
+      }}
+      onFocus={e => { if (!invalid) e.currentTarget.style.borderColor = T.coralBorder; e.currentTarget.style.background = "#FFFFFF"; }}
+      onBlur={e  => { if (!invalid) e.currentTarget.style.borderColor = T.border; e.currentTarget.style.background = T.inputBg; }}
     />
     {invalid && (
-      <p className="text-xs text-red-400 flex items-center gap-1.5">
+      <p className="text-xs text-red-500 flex items-center gap-1.5 mt-0.5">
         <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
         </svg>
@@ -58,22 +68,22 @@ const Step1 = ({ formData, updateForm, onNext }) => {
     fromLabel, fromPlaceholder,
     destLabel, destPlaceholder,
     startLabel, endLabel,
-    nextBtn, invalidPlaceError,
+    nextBtn, invalidErr,
   ] = useTranslate([
-    "Où voulez-vous aller ?",
-    "Étape 1 sur 3 — Où & Quand",
-    "Départ depuis",
-    "ex. Casablanca, Rabat, Agadir...",
+    "Where do you want to go?",
+    "Step 1 of 3 — Where & When",
+    "Travelling From",
+    "e.g. Casablanca, Rabat, Agadir...",
     "Destination",
-    "ex. Marrakech, Fès, Chefchaouen...",
-    "Date de départ",
-    "Date de retour",
-    "Continuer",
-    "Lettres uniquement — pas de chiffres ou symboles.",
+    "e.g. Marrakech, Fès, Chefchaouen...",
+    "Departure Date",
+    "Return Date",
+    "Continue",
+    "Letters only — no numbers or symbols.",
   ]);
 
-  const fromTouched = formData.from?.length > 0;
-  const destTouched = formData.destination?.length > 0;
+  const fromTouched = (formData.from?.length || 0) > 0;
+  const destTouched = (formData.destination?.length || 0) > 0;
   const fromInvalid = fromTouched && !isValidPlace(formData.from);
   const destInvalid = destTouched && !isValidPlace(formData.destination);
 
@@ -82,54 +92,57 @@ const Step1 = ({ formData, updateForm, onNext }) => {
     isValidPlace(formData.from) && isValidPlace(formData.destination) &&
     formData.startDate && formData.endDate;
 
+  const sanitize = (v) => v.replace(/[0-9!@#$%^&*()_+=[\]{};:"\\|<>?/]/g,"");
+
   return (
     <div>
-      <div className="mb-6">
-        <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color:G.primary }}>{sub}</p>
-        <h2 className="font-serif text-xl md:text-2xl font-black text-white">{title}</h2>
+      {/* Header */}
+      <div className="mb-7">
+        <span className="inline-block text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full mb-2"
+          style={{ background:T.coralLight, color:T.coral }}>
+          {sub}
+        </span>
+        <h2 className="font-serif text-2xl md:text-3xl font-black" style={{ color:T.text }}>
+          {title}
+        </h2>
       </div>
 
-      <div className="flex flex-col gap-4 md:gap-5">
-        <InputField
-          label={fromLabel} placeholder={fromPlaceholder}
-          value={formData.from || ""} invalid={fromInvalid} errorMsg={invalidPlaceError}
-          onChange={e => updateForm({ from: e.target.value.replace(/[0-9!@#$%^&*()_+=[\]{};:"\\|<>?/]/g,"") })}
+      <div className="flex flex-col gap-5">
+        <Field label={fromLabel} placeholder={fromPlaceholder}
+          value={formData.from || ""} invalid={fromInvalid} errorMsg={invalidErr}
+          onChange={e => updateForm({ from: sanitize(e.target.value) })}
         />
-        <InputField
-          label={destLabel} placeholder={destPlaceholder}
-          value={formData.destination} invalid={destInvalid} errorMsg={invalidPlaceError}
-          onChange={e => updateForm({ destination: e.target.value.replace(/[0-9!@#$%^&*()_+=[\]{};:"\\|<>?/]/g,"") })}
+        <Field label={destLabel} placeholder={destPlaceholder}
+          value={formData.destination || ""} invalid={destInvalid} errorMsg={invalidErr}
+          onChange={e => updateForm({ destination: sanitize(e.target.value) })}
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+        {/* Date row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[
             { label:startLabel, field:"startDate", min:today, max:maxDate },
             { label:endLabel,   field:"endDate",   min:formData.startDate||today, max:maxDate },
           ].map(({ label, field, min, max }) => (
             <div key={field} className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold tracking-widest text-white/30 uppercase">{label}</label>
-              <input
-                type="date" min={min} max={max}
-                value={formData[field]}
+              <label className="text-[11px] font-bold tracking-widest uppercase" style={{ color:T.muted }}>{label}</label>
+              <input type="date" min={min} max={max}
+                value={formData[field] || ""}
                 onChange={e => updateForm({ [field]:e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 min-h-12 text-sm text-white/85 focus:outline-none transition-all duration-200"
-                style={{ colorScheme:"dark" }}
-                onFocus={e=>e.currentTarget.style.borderColor=G.badgeBorder}
-                onBlur={e=>e.currentTarget.style.borderColor="rgba(255,255,255,0.10)"}
+                className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all duration-200"
+                style={{ background:T.inputBg, border:`1.5px solid ${T.border}`, color:T.text, colorScheme:"light" }}
+                onFocus={e => { e.currentTarget.style.borderColor=T.coralBorder; e.currentTarget.style.background="#FFFFFF"; }}
+                onBlur={e  => { e.currentTarget.style.borderColor=T.border; e.currentTarget.style.background=T.inputBg; }}
               />
             </div>
           ))}
         </div>
       </div>
 
-      <button
-        onClick={onNext}
-        disabled={!isValid}
-        className="mt-7 md:mt-8 w-full py-3.5 min-h-13 rounded-xl font-bold text-sm text-white transition-all hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
-        style={{
-          background: isValid ? `linear-gradient(135deg,${G.deep||"#8b3a22"},${G.primary})` : undefined,
-          boxShadow:  isValid ? `0 6px 20px rgba(218,119,86,0.25)` : undefined,
-        }}
+      <button onClick={onNext} disabled={!isValid}
+        className="mt-8 w-full py-3.5 rounded-xl font-bold text-sm text-white transition-all hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-35 disabled:cursor-not-allowed disabled:transform-none"
+        style={{ background:isValid ? `linear-gradient(135deg,#8b3a22,${T.coral})` : "#D6D3CE", boxShadow:isValid?`0 4px 18px rgba(218,119,86,0.30)`:"none" }}
+        onMouseEnter={e=>{ if(isValid) e.currentTarget.style.background=`linear-gradient(135deg,#7a3120,${T.coralHover})`; }}
+        onMouseLeave={e=>{ if(isValid) e.currentTarget.style.background=`linear-gradient(135deg,#8b3a22,${T.coral})`; }}
       >
         {nextBtn} →
       </button>
